@@ -23,13 +23,13 @@ Hooks.once("init", () => {
   });
 
   // Snap the preview image to set distances and angles, holding shift bypasses this system
-  libWrapper.register("snappy-templates", "TemplateLayer.prototype._onDragLeftMove", function(wrapped, ...args) {
-    wrapped(...args);
+  libWrapper.register("snappy-templates", "TemplateLayer.prototype._onDragLeftMove", function(wrapped, event) {
+    wrapped(event);
     if (game.keyboard.isModifierActive(KeyboardManager.MODIFIER_KEYS.SHIFT)) return;
 
     const directionSnapInterval = game.settings.get("snappy-templates", "directionSnapInterval");
     const distanceSnapInterval = game.settings.get("snappy-templates", "distanceSnapInterval");
-    const previewDocument = args[0].interactionData.preview.document;
+    const previewDocument = event.interactionData.preview.document;
     if (directionSnapInterval) previewDocument.direction = Math.round(previewDocument.direction / directionSnapInterval) * directionSnapInterval;
     if (distanceSnapInterval) previewDocument.distance = Math.round(previewDocument.distance / distanceSnapInterval) * distanceSnapInterval;
   }, "WRAPPER");
