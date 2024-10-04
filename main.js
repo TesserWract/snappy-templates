@@ -1,6 +1,6 @@
 // Warning when missing the lib-wrapper module
 Hooks.once("ready", () => {
-  if (!game.modules.get("lib-wrapper")?.active && game.user.isGM) ui.notifications.error("Hex Grid Support requires the 'libWrapper' module. Please install and activate it.")
+  if (!game.modules.get("lib-wrapper")?.active && game.user.isGM) ui.notifications.error("Snappy Templates requires the 'libWrapper' module. Please install and activate it.")
 });
 
 Hooks.once("init", () => {
