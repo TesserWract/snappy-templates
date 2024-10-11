@@ -47,37 +47,36 @@ Hooks.once("init", () => {
     if (distanceSnapInterval) previewDocument.distance = Math.round(previewDocument.distance / distanceSnapInterval) * distanceSnapInterval;
   }, "WRAPPER");
 
-  // Snap the origin point based on user settings
-  libWrapper.register("snappy-templates", "TemplateLayer.prototype._onDragLeftStart", function(wrapped, event) {
-    const {x, y} = event.interactionData.origin;
-    const result = wrapped(event);
-    result.then(value => {
-      const originSnapMode = game.settings.get("snappy-templates", "originSnapMode");
-      if (this.options.snapToGrid && !event.shiftKey && originSnapMode !== "mixed") {
-        // Snap to center
-        let vertex = canvas.grid.getCenter(x, y);
-        if (originSnapMode === "corner") {
-          // Snap to corner - square grid
-          if (canvas.grid.grid instanceof SquareGrid) {
-            vertex = canvas.grid.grid._getNearestVertex(x, y);
-          }
-          // Snap to corder - hex grid
-          else {
-            const w4 = canvas.grid.w / 4;
-            const h4 = canvas.grid.h / 4;
-            const dx = x - vertex[0];
-            const dy = y - vertex[1];
-            const ox = dx.between(-w4, w4) && !canvas.grid.columnar ? 0 : Math.sign(dx);
-            const oy = dy.between(-h4, h4) && canvas.grid.columnar ? 0 : Math.sign(dy);
-            const vert = canvas.grid.grid._getClosestVertex(vertex[0], vertex[1], ox, oy);
-            vertex[0] = vert.x;
-            vertex[1] = vert.y;
-          }
-        }
-        value.document.x = vertex[0];
-        value.document.y = vertex[1];
-      }
-    });
-    return result;
+  // Adjust snapping for hex grid
+  libWrapper.register("snappy-templates", "HexagonalGrid.prototype.getSnappedPosition", function(wrapped, x, y, interval, token) {
+    const originSnapMode = game.settings.get("snappy-templates", "originSnapMode");
+    // Passthrough
+    if (originSnapMode === "both" || interval !== 5) return wrapped(x, y, interval, token);
+
+    // Snap to center
+    const center = this.getCenter(x, y);
+    if (originSnapMode === "center") {
+      return {x: center[0], y: center[1]};
+    }
+
+    // Snap to corner
+    const w4 = canvas.grid.w / 4;
+    const h4 = canvas.grid.h / 4;
+    const dx = x - center[0];
+    const dy = y - center[1];
+    const ox = dx.between(-w4, w4) && !this.columnar ? 0 : Math.sign(dx);
+    const oy = dy.between(-h4, h4) && this.columnar ? 0 : Math.sign(dy);
+    return this._getClosestVertex(center[0], center[1], ox, oy);
+  });
+
+  // Adjust snapping for square grid
+  libWrapper.register("snappy-templates", "SquareGrid.prototype.getSnappedPosition", function(wrapped, x, y, interval, options) {
+    const originSnapMode = game.settings.get("snappy-templates", "originSnapMode");
+    // Passthrough
+    if (originSnapMode === "both" || interval !== 2) return wrapped(x, y, interval, options);
+
+    // Snap to center / corner
+    const position = (originSnapMode === "center" ? this.getCenter(x, y) : this._getNearestVertex(x, y));
+    return {x: position[0], y: position[1]};
   });
 });

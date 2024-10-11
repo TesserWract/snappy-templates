@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 - 11/10/2024
+
+### Fixes
+- The origin of templates should now snap to the correct location when dragged to a new position.
+
 ## 1.1.0 - 10/10/2024
 
 ### Additions
