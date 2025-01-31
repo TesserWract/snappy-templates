@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0 - 1/30/2025
+
+### Changes
+- Updated the module for V12.
+
 ## 1.1.1 - 11/10/2024
 
 ### Fixes

@@ -4,8 +4,8 @@
 "snappy-templates.DistanceSnapIntervalName": "Distance Snap Interval",
 "snappy-templates.DistanceSnapIntervalHint": "The incremental units to snap a template's distance to. (Set to 0 or hold Shift to disable)",
 "snappy-templates.OriginSnapModeName": "Origin Snap Mode",
-"snappy-templates.OriginSnapModeHint": "Snap the origin point to the grid cell's center, corner, or both.",
-"snappy-templates.OriginSnapOptionBoth": "Center + Corner",
+"snappy-templates.OriginSnapModeHint": "Overwrite the grid cell's origin snapping mode.",
 "snappy-templates.OriginSnapOptionCenter": "Center",
-"snappy-templates.OriginSnapOptionCorner": "Corner"
+"snappy-templates.OriginSnapOptionCorner": "Corner",
+"snappy-templates.OriginSnapOptionDefault": "Default"
 }

@@ -28,11 +28,11 @@ Hooks.once("init", () => {
     config: true,
     type: String,
     choices: {
-      "both": "snappy-templates.OriginSnapOptionBoth",
+      "default": "snappy-templates.OriginSnapOptionDefault",
       "center": "snappy-templates.OriginSnapOptionCenter",
       "corner": "snappy-templates.OriginSnapOptionCorner"
     },
-    default: "both"
+    default: "default"
   });
 
   // Snap the preview image to set distances and angles, holding shift bypasses this system
@@ -47,36 +47,15 @@ Hooks.once("init", () => {
     if (distanceSnapInterval) previewDocument.distance = Math.round(previewDocument.distance / distanceSnapInterval) * distanceSnapInterval;
   }, "WRAPPER");
 
-  // Adjust snapping for hex grid
-  libWrapper.register("snappy-templates", "HexagonalGrid.prototype.getSnappedPosition", function(wrapped, x, y, interval, token) {
+  // Overwrites the snapping mode used by the getSnappedPoint function to a user selected value.
+  function snapModeOverwrite(wrapped, point, behavior) {
     const originSnapMode = game.settings.get("snappy-templates", "originSnapMode");
-    // Passthrough
-    if (originSnapMode === "both" || interval !== 5) return wrapped(x, y, interval, token);
+    const M = CONST.GRID_SNAPPING_MODES;
 
-    // Snap to center
-    const center = this.getCenter(x, y);
-    if (originSnapMode === "center") {
-      return {x: center[0], y: center[1]};
-    }
+    if (originSnapMode !== "default") behavior.mode = {center: M.CENTER, corner: M.VERTEX, edge: M.SIDE_MIDPOINT}[originSnapMode];
+    return wrapped(point, behavior);
+  };
 
-    // Snap to corner
-    const w4 = canvas.grid.w / 4;
-    const h4 = canvas.grid.h / 4;
-    const dx = x - center[0];
-    const dy = y - center[1];
-    const ox = dx.between(-w4, w4) && !this.columnar ? 0 : Math.sign(dx);
-    const oy = dy.between(-h4, h4) && this.columnar ? 0 : Math.sign(dy);
-    return this._getClosestVertex(center[0], center[1], ox, oy);
-  });
-
-  // Adjust snapping for square grid
-  libWrapper.register("snappy-templates", "SquareGrid.prototype.getSnappedPosition", function(wrapped, x, y, interval, options) {
-    const originSnapMode = game.settings.get("snappy-templates", "originSnapMode");
-    // Passthrough
-    if (originSnapMode === "both" || interval !== 2) return wrapped(x, y, interval, options);
-
-    // Snap to center / corner
-    const position = (originSnapMode === "center" ? this.getCenter(x, y) : this._getNearestVertex(x, y));
-    return {x: position[0], y: position[1]};
-  });
+  libWrapper.register("snappy-templates", "foundry.grid.HexagonalGrid.prototype.getSnappedPoint", snapModeOverwrite);
+  libWrapper.register("snappy-templates", "foundry.grid.SquareGrid.prototype.getSnappedPoint", snapModeOverwrite);
 });
